@@ -1,10 +1,20 @@
 <template>
-    <!--default-active="2" 是当前激活菜单的index-->
+    <!--default-active="2" 是当前激活菜单的index
+    collpase 是控制收起展开功能
+    -->
     <el-menu
     default-active="/"
     background-color="#002033"
     text-color="#fff"
-    active-text-color="#ffd04b">
+    active-text-color="#ffd04b"
+    router
+     :collapse="isCollapse"
+    >
+    <!-- :collapse="isCollapse" -->
+    <!-- router 路由-->
+    <div class="aside-logo" style="background-color:#002033">
+      <img src="@/views/logo_admin.png" alt="" />
+    </div>
     <el-menu-item index="/">
     <i class="el-icon-s-home"></i>
     <span slot="title">首页</span>
@@ -40,9 +50,11 @@
 export default {
   name: 'AppAside',
   components: {},
-  props: {},
+  props: ['is-collapse'],
   data () {
-    return {}
+    return {
+      isCollapse: false
+    }
   },
   computed: {},
   watch: {},
@@ -53,4 +65,10 @@ export default {
 
 </script>
 <style scoped lang='less'>
+  .aside-logo{
+       padding: 10px 25px 0px 18px;
+       img{
+           width: 140px;
+       }
+      }
 </style>

@@ -6,6 +6,7 @@ import VueRouter from 'vue-router'
 import Login from '@/views/login/'
 import Layout from '@/views/layout/'
 import Home from '@/views/home/'
+import Article from '@/views/article/'
 
 Vue.use(VueRouter)
 // 路由配置表
@@ -22,14 +23,35 @@ const routes = [{
   component: Layout,
   // 首页
   children: [{
-    path: '', // path为空会作为默认子路由渲染
+    path: '', // path为空会作为默认子路由渲染 首页
     name: 'home',
     component: Home
+  },
+  {
+    path: '/article',
+    name: 'article',
+    component: Article
   }]
 }
 ]
 
 const router = new VueRouter({
   routes
+})
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(window.localStorage.getItem('user'))
+  // 如果没有登录，则跳到登录页面 校验非登录页面的登录状态
+  if (to.path !== '/login') {
+    if (user) {
+      // 如果已经登录允许通过
+      next()
+    } else {
+      // 没有登录跳转到登录页
+      next('/login')
+    }
+  } else {
+    // 登录页面允许正常通过
+    next()
+  }
 })
 export default router

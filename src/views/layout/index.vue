@@ -1,15 +1,21 @@
 <template>
+<!-- width='auto' 宽度设置为自动 -->
   <el-container class="container">
-    <el-aside class="aside" width="200px">
-      <div class="aside-logo" style="background-color:#002033">
-        <img src="@/views/logo_admin.png" alt="" />
-      </div>
-        <app-aside class="aside-menu" />
+    <el-aside class="aside"
+       width="auto">
+      <app-aside
+      class="aside-menu"
+      :is-collapse="isCollapse">
+        </app-aside>
     </el-aside>
     <el-container>
       <el-header class="header">
          <div class="left">
-        <i class="el-icon-s-fold"></i>
+        <i :class="{
+              'el-icon-s-fold': isCollapse,
+              'el-icon-s-unfold': !isCollapse
+            }"
+              @click="isCollapse = !isCollapse"></i>
         <span>江苏传智播客科技教育有限公司</span>
         </div>
         <div class="right">
@@ -20,12 +26,14 @@
             </span>
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>个人设置</el-dropdown-item>
-                <el-dropdown-item>退出登录</el-dropdown-item>
+                <el-dropdown-item @click.native="onLogout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
             </el-dropdown>
             </div>
           </el-header>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view />
+      </el-main>
     </el-container>
   </el-container>
 
@@ -50,7 +58,8 @@ export default {
   data () {
     return {
       // 当前登录用户信息
-      user: {}
+      user: {},
+      isCollapse: false // 侧边菜单栏的展示状态
     }
   },
   computed: {},
@@ -65,6 +74,23 @@ export default {
       getUserProfile().then(res => {
         // console.log(res)
         this.user = res.data.data
+      })
+    },
+    onLogout () {
+      this.$confirm('你确认要退出吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 点击确认取消 清除用户的登录状态
+        window.localStorage.removeItem('user')
+        // 跳转到登录页面
+        this.$router.push('/login')
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消退出'
+        })
       })
     }
   }
@@ -86,12 +112,6 @@ export default {
           background-color: #002033;
       }
     }
-    .aside-logo{
-       padding: 10px 25px 0px 25px;
-       img{
-           width: 140px;
-       }
-      }
     .header {
     background-color: #fff;
     border-bottom:1px solid #ccc ;

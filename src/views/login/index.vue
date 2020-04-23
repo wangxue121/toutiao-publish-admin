@@ -48,7 +48,7 @@ export default {
       user: {
         mobile: '', // 手机号
         code: '', // 验证码
-        agree: 'false'
+        agree: ''
       },
       loginLoading: false,
       formRules: { // 表单验证规则
@@ -105,14 +105,17 @@ export default {
       this.loginLoading = true
       // 通过验证，提交表单
       login(this.user).then(res => {
-        console.log(res)
+        // console.log(res)
         this.$message({
           message: '恭喜你, 登录成功',
           type: 'success'
         })
         // 关闭 loading
         this.loginLoading = false
-
+        // 将接口返回的用户相关的数据放到本地存储，方便数据共享
+        // window.localStorage.setItem('user', res.data.data)
+        // 把本地存储的数据，转成json格式的字符串 得到之后在user.js 中使用
+        window.localStorage.setItem('user', JSON.stringify(res.data.data))
         // 跳转到首页 编程式导航 两种方法都可 第一种是路由没有name
         // this.$router.push('/')
 

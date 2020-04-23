@@ -15,15 +15,19 @@ export const login = data => {
 }
 // 获取用户信息
 export const getUserProfile = () => {
+  // 把json格式的字符串转成原来的数据对象
+  // const user = JSON.parse(window.localStorage.getItem('user'))
+  // console.log(user)
   return request({
     method: 'GET',
-    url: '/mp/v1_0/user/profile',
+    url: '/mp/v1_0/user/profile'
     // 属性名和属性值要看接口要求
     // 属性名：Authorization ,接口文档要求
     // 属性值： Bearer空格token数据
-    headers: {
-      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTg5NDA2OTcsInVzZXJfaWQiOjEsInJlZnJlc2giOmZhbHNlLCJ2ZXJpZmllZCI6dHJ1ZX0.7SlZXYY-QhFJ9hKRaOVIRYIO5dxQPYJlGweFuUhH5-Q'
-    }
+    // 已经在拦截器设置统一的了，所以这就不用写了,所有需要授权的都不用写了
+    // headers: {
+    //   Authorization: `Bearer ${user.token}`
+    // }
   })
 }
 // 修改用户信息
