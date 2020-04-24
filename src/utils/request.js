@@ -1,4 +1,5 @@
 // 基于axios封装的请求模块
+// baseURL 基准地址
 import axios from 'axios'
 const request = axios.create({
   baseURL: 'http://ttapi.research.itcast.cn/'

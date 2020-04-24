@@ -11,11 +11,21 @@
     <el-container>
       <el-header class="header">
          <div class="left">
+           <!--
+              class 样式处理
+              {
+                css类名: 布尔值
+              }
+              true: 作用类名
+              false: 不作用类名
+            -->
         <i :class="{
+          // 更改小图标的样式
               'el-icon-s-fold': isCollapse,
               'el-icon-s-unfold': !isCollapse
             }"
               @click="isCollapse = !isCollapse"></i>
+             <!-- 设置点击事件 如果收起就展开  如果展开就收起 -->
         <span>江苏传智播客科技教育有限公司</span>
         </div>
         <div class="right">
@@ -57,8 +67,7 @@ export default {
   props: {},
   data () {
     return {
-      // 当前登录用户信息
-      user: {},
+      user: {}, // 当前登录用户信息
       isCollapse: false // 侧边菜单栏的展示状态
     }
   },
@@ -70,9 +79,12 @@ export default {
   },
   mounted () {},
   methods: {
+    // 除了登录接口其他接口都要授权之后才可以使用
     loadUserProfile () {
+      // 获取用户信息成功
       getUserProfile().then(res => {
         // console.log(res)
+        // 把信息传入data里面的user
         this.user = res.data.data
       })
     },

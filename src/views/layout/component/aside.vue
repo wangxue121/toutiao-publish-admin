@@ -1,14 +1,16 @@
 <template>
     <!--default-active="2" 是当前激活菜单的index
     collpase 是控制收起展开功能
+    default-active="/"
+    :default-active="$route.path"
     -->
     <el-menu
-    default-active="/"
+    :default-active="$route.path"
     background-color="#002033"
     text-color="#fff"
     active-text-color="#ffd04b"
     router
-     :collapse="isCollapse"
+    :collapse="isCollapse"
     >
     <!-- :collapse="isCollapse" -->
     <!-- router 路由-->
@@ -53,7 +55,7 @@ export default {
   props: ['is-collapse'],
   data () {
     return {
-      isCollapse: false
+      // isCollapse: false
     }
   },
   computed: {},
