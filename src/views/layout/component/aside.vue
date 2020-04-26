@@ -3,9 +3,10 @@
     collpase 是控制收起展开功能
     default-active="/"
     :default-active="$route.path"
+      :default-active="$route.path"
     -->
     <el-menu
-    :default-active="$route.path"
+    default-active="/"
     background-color="#002033"
     text-color="#fff"
     active-text-color="#ffd04b"
