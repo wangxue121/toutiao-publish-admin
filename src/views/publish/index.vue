@@ -7,12 +7,20 @@
     <el-breadcrumb-item>{{$route.query.id ? '修改文章' : '发布文章'}}</el-breadcrumb-item>
     </el-breadcrumb>
       </div>
-    <el-form ref="form" :model="article" label-width="70px">
-    <el-form-item label="标题:">
+      <!-- prop属性设置为需要验证的名字  ref 获取都没元素 -->
+    <el-form ref="publish-form" :model="article" label-width="70px" :rules="ruleForm">
+    <el-form-item label="标题:" prop="title">
         <el-input v-model="article.title"></el-input>
     </el-form-item>
-    <el-form-item label="内容:">
-        <el-input type="textarea" v-model="article.content"></el-input>
+    <el-form-item label="内容:" prop="content">
+      <div>
+          <el-tiptap
+            v-model="article.content"
+            :extensions="extensions"
+            height = "300"
+            placeholder = '请输入文章内容'
+          />
+        </div>
     </el-form-item>
     <el-form-item label="封面:">
       <el-radio-group v-model="article.cover.type">
@@ -22,7 +30,7 @@
         <el-radio :label="-1">自动</el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="频道:">
+    <el-form-item label="频道:" prop="channels">
         <el-select v-model="article.channel_id" placeholder="请选择频道">
         <el-option
         v-for="(channel, index) in channels"
@@ -37,7 +45,6 @@
     </el-form-item>
 </el-form>
 </el-card>
-
   </div>
 </template>
 
@@ -49,9 +56,32 @@ import {
   getArticle, // 获取文章
   updateArticle // 修改文章
 } from '@/api/article'
+
+import {
+  ElementTiptap,
+  // necessary extensions
+  Doc,
+  Text,
+  Paragraph,
+  Heading,
+  Bold,
+  Underline,
+  Italic,
+  Strike,
+  ListItem,
+  BulletList,
+  OrderedList,
+  Preview,
+  TextColor,
+  Image
+} from 'element-tiptap'
+
+// import element-tiptap 样式
+import 'element-tiptap/lib/index.css'
+import { uploadImage } from '@/api/image'
 export default {
   name: 'PublishIndex',
-  components: {},
+  components: { 'el-tiptap': ElementTiptap },
   props: {},
   data () {
     return {
@@ -64,6 +94,57 @@ export default {
           images: [] // 封面图片地址
         },
         channel_id: null // 文章所属频道的id
+      },
+      extensions: [
+        new Doc(),
+        new Text(),
+        new Paragraph(),
+        new Heading({ level: 5 }),
+        new Bold({ bubble: true }), // render command-button in bubble menu.
+        new Underline(),
+        new Italic(),
+        new Strike(),
+        new ListItem(),
+        new BulletList(),
+        new OrderedList(),
+        new Preview(),
+        new TextColor(),
+        new Image({
+          // 默认把图片生成base64 字符串和内容存储到一起，如果需要自定义图片上传
+          uploadRequest (file) {
+            // 图片上传
+            const fd = new FormData()
+            fd.append('image', file)
+            // 这个 return 返回的是Promise 对象
+            // 因为 axios 本身就是返回的 Proimse 对象
+            return uploadImage(fd).then(res => {
+              console.log(res)
+              // 这个 return 是返回最后的结果
+              return res.data.data.url
+            })
+          } // 图片上传方法，返回一个Promise<url>
+        })
+      ],
+      ruleForm: {
+        // blur 失去焦点  change是发生改变
+        title: [
+          { required: true, message: '请输入文章标题', trigger: 'blur' },
+          { min: 5, max: 30, message: '长度在 5 到 30 个字符', trigger: 'blur' }
+        ],
+        content: [{
+          validator (rule, value, callback) {
+            if (value === '<p></p>' || value === '') {
+              callback(new Error('内容不能为空')) // 验证失败
+            } else {
+              callback() // 验证通过
+            }
+          }
+        },
+        { required: true, message: '内容不能为空', trigger: 'blur' }
+        ],
+        channels: [
+          { required: true, message: '请选择频道' }
+        ]
       }
     }
   },
@@ -85,34 +166,68 @@ export default {
         this.channels = res.data.data.channels
       })
     },
+    // onPublish (draft = false) {
+    //   // 找到数据接口
+    //   // 封装请求方法
+    //   // 请求提交表单
+    //   const articleId = this.$route.query.id
+    //   // 如果存在id 那么就是修改文章，执行修改操作 否则执行添加操作
+    //   if (articleId) {
+    //     updateArticle(articleId, this.article, draft).then(res => {
+    //       // console.log(res)
+    //       this.$message({
+    //         message: '修改成功',
+    //         type: 'success'
+    //       })
+    //       // 发布成功跳到内容管理界面
+    //       this.$router.push('/article')
+    //     })
+    //   } else {
+    //     addArticle(this.article).then(res => {
+    //       // 处理响应结果
+    //       // console.log(res)
+    //       this.$message({
+    //         message: `${draft ? '存入草稿' : '发布'}成功`,
+    //         type: 'success'
+    //       })
+    //       // 发布成功跳到内容管理界面
+    //       this.$router.push('/article')
+    //     })
+    //   }
+    // },
+
+    // 作了表单验证的
     onPublish (draft = false) {
-      // 找到数据接口
-      // 封装请求方法
-      // 请求提交表单
-      const articleId = this.$route.query.id
-      // 如果存在id 那么就是修改文章，执行修改操作 否则执行添加操作
-      if (articleId) {
-        updateArticle(articleId, this.article, draft).then(res => {
-          // console.log(res)
-          this.$message({
-            message: '修改成功',
-            type: 'success'
+      this.$refs['publish-form'].validate(valid => {
+        if (!valid) { // 如果验证失败 停止提交表单
+          return
+        }
+        // 验证通过，提交表单
+        const articleId = this.$route.query.id
+        // 如果存在id 那么就是修改文章，执行修改操作 否则执行添加操作
+        if (articleId) {
+          updateArticle(articleId, this.article, draft).then(res => {
+            // console.log(res)
+            this.$message({
+              message: '修改成功',
+              type: 'success'
+            })
+            // 发布成功跳到内容管理界面
+            this.$router.push('/article')
           })
-          // 发布成功跳到内容管理界面
-          this.$router.push('/article')
-        })
-      } else {
-        addArticle(this.article).then(res => {
-          // 处理响应结果
-          // console.log(res)
-          this.$message({
-            message: `${draft ? '存入草稿' : '发布'}成功`,
-            type: 'success'
+        } else {
+          addArticle(this.article).then(res => {
+            // 处理响应结果
+            // console.log(res)
+            this.$message({
+              message: `${draft ? '存入草稿' : '发布'}成功`,
+              type: 'success'
+            })
+            // 发布成功跳到内容管理界面
+            this.$router.push('/article')
           })
-          // 发布成功跳到内容管理界面
-          this.$router.push('/article')
-        })
-      }
+        }
+      })
     },
 
     // 修改文章 加载文章内容

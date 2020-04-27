@@ -1,0 +1,118 @@
+<template>
+<div class="Image-container" >
+<el-card class="box-card">
+  <div slot="header" class="clearfix">
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>素材管理</el-breadcrumb-item>
+    </el-breadcrumb>
+  </div>
+  <!-- 全部和收藏两个单选按钮 -->
+   <div class="top">
+    <el-radio-group v-model="collect" @change="onCollectChange">
+      <el-radio-button :label="false" >全部</el-radio-button>
+      <el-radio-button :label="true" >收藏</el-radio-button>
+    </el-radio-group>
+     <el-button size="small" type="warning" @click="dialogimgleVisible = true">上传素材</el-button>
+  </div>
+  <!-- 响应式布局 -->
+  <el-row :gutter="10">
+  <el-col
+    v-for="(img, index) in images"
+    :key=index
+    :xs="24" :sm="12" :md="8" :lg="6" :xl="4">
+      <div class="demo-image">
+    <el-image
+      style="height: 150px"
+      :src="img.url"
+      fit="cover">
+      </el-image>
+</div>
+  </el-col>
+</el-row>
+<!-- 分页 -->
+<el-pagination
+  style="margin-top:20px"
+  background
+  layout="prev, pager, next"
+  :total="1000">
+</el-pagination>
+</el-card>
+<!-- 图片上传 -->
+<el-dialog title="上传素材" :visible.sync="dialogimgleVisible" :append-to-body="true">
+    <!-- name 上传文件名字
+    show-file-list 上传文件列表 默认是true
+    on-success 点击文件列表中已上传文件时的钩子
+    v-if="dialogimgleVisible 会随着对话框的显示与隐藏进行销毁上传记录  -->
+    <!-- upload 组件本身就支持请求提交操作 就是不需要自己去发送请求
+    请求路径：action ,必须写完整路径
+    请求头：headers
+    -->
+  <el-upload
+    v-if="dialogimgleVisible"
+    class="upload-demo"
+    drag
+    action="http://ttapi.research.itcast.cn/mp/v1_0/user/images"
+    multiple
+    :headers="uploadHeaders"
+    name="image"
+    :on-success="onUploadSuccess"
+    >
+    <i class="el-icon-upload"></i>
+    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+    <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+  </el-upload>
+</el-dialog>
+</div>
+</template>
+<script>
+import { getImages } from '@/api/image/'
+export default {
+  name: 'ImageIndex',
+  components: {},
+  props: {},
+  data () {
+    const user = JSON.parse(window.localStorage.getItem('user'))
+    return {
+      collect: false,
+      images: [],
+      dialogimgleVisible: false,
+      uploadHeaders: {
+        Authorization: `Bearer ${user.token}`
+      }
+    }
+  },
+  computed: {},
+  watch: {},
+  created () {
+    this.loadImages(false)
+  },
+  mounted () {},
+  methods: {
+    loadImages (collect = false) {
+      getImages({ collect }).then(res => { // 接口文档 参数 collect
+        // console.log(res)
+        this.images = res.data.data.results
+      })
+    },
+    onCollectChange (value) {
+      this.loadImages(value)
+    },
+    onUploadSuccess () {
+      // 关闭弹出层
+      this.dialogimgleVisible = false
+      // 更新素材列表 (加载全部)
+      this.loadImages(false)
+    }
+  }
+}
+
+</script>
+<style scoped lang='less'>
+.top {
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+</style>
