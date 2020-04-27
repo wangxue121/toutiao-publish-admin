@@ -27,6 +27,16 @@
       :src="img.url"
       fit="cover">
       </el-image>
+       <div style="padding: 14px;" class="action">
+              <!-- class 还支持对象语法， -->
+              <i
+                :class="{
+                'el-icon-star-on': img.is_collected,
+                'el-icon-star-off': !img.is_collected
+              }"
+              ></i>
+              <i class="el-icon-delete-solid"></i>
+            </div>
 </div>
   </el-col>
 </el-row>
@@ -35,7 +45,9 @@
   style="margin-top:20px"
   background
   layout="prev, pager, next"
-  :total="1000">
+  :total="totalCount"
+  :page-size="pageSize"
+  @current-change="onCurrentChange">
 </el-pagination>
 </el-card>
 <!-- 图片上传 -->
@@ -79,20 +91,30 @@ export default {
       dialogimgleVisible: false,
       uploadHeaders: {
         Authorization: `Bearer ${user.token}`
-      }
+      },
+      pageSize: 10,
+      totalCount: 0
     }
   },
   computed: {},
   watch: {},
   created () {
-    this.loadImages(false)
+    this.loadImages(false, 1)
   },
   mounted () {},
   methods: {
-    loadImages (collect = false) {
-      getImages({ collect }).then(res => { // 接口文档 参数 collect
-        // console.log(res)
-        this.images = res.data.data.results
+    // 获取素材
+    loadImages (collect = false, page = 1) {
+      getImages({
+        collect,
+        page,
+        per_page: this.pageSize
+      }).then(res => { // 接口文档 参数 collect
+        // // console.log(res)
+        // this.images = res.data.data.results
+        const { results, total_count: totalCount } = res.data.data
+        this.images = results
+        this.totalCount = totalCount
       })
     },
     onCollectChange (value) {
@@ -103,6 +125,9 @@ export default {
       this.dialogimgleVisible = false
       // 更新素材列表 (加载全部)
       this.loadImages(false)
+    },
+    onCurrentChange (page) {
+      this.loadImages(false, page)
     }
   }
 }
