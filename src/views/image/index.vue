@@ -27,16 +27,16 @@
       :src="img.url"
       fit="cover">
       </el-image>
-       <div style="padding: 14px;" class="action">
-              <!-- class 还支持对象语法， -->
-              <i
-                :class="{
-                'el-icon-star-on': img.is_collected,
-                'el-icon-star-off': !img.is_collected
-              }"
-              ></i>
-              <i class="el-icon-delete-solid"></i>
-            </div>
+      <!-- 收藏和删除 -->
+     <div class="little">
+         <i :class='{
+             // false 是取消收藏  true是收藏
+             "el-icon-star-off": !img.is_collected,
+             "el-icon-star-on": img.is_collected,
+             "star":true
+         }' @click="oncllectImg(img)"></i>
+         <i class='el-icon-delete' @click="ondeleteImg(img.id)"></i>
+     </div>
 </div>
   </el-col>
 </el-row>
@@ -77,8 +77,14 @@
 </el-dialog>
 </div>
 </template>
+
 <script>
-import { getImages } from '@/api/image/'
+import {
+  getImages, // 获取素材
+  deleteImage, // 删除素材
+  collectImage // 收藏
+} from '@/api/image/'
+
 export default {
   name: 'ImageIndex',
   components: {},
@@ -128,6 +134,36 @@ export default {
     },
     onCurrentChange (page) {
       this.loadImages(false, page)
+    },
+
+    ondeleteImg (imageId) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // console.log(imageId)
+        deleteImage(imageId).then(() => {
+          this.loadImages()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+
+    oncllectImg (img) {
+      console.log(img)
+      collectImage(img.id, img.is_collected).then((res) => {
+        console.log(res)
+        img.is_collected = !res.data.data.collect
+      })
     }
   }
 }
@@ -139,5 +175,21 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+.demo-image{
+position: relative;
+.little{
+    position: absolute;
+    top: 125px;
+    left: 70px;
+    color: #dfdfad;
+    font-size: 20px;
+}
+.star {
+    margin-right: 50px;
+}
+}
+.red {
+    color: tomato;
 }
 </style>
