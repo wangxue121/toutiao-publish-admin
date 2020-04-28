@@ -29,13 +29,30 @@
       </el-image>
       <!-- 收藏和删除 -->
      <div class="little">
-         <i :class='{
+       <el-button
+       size="mini"
+       circle
+      type="success"
+      :icon="img.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'"
+      @click="oncllectImg(img)"
+      :loading="img.loading"
+      ></el-button>
+      <el-button
+      size="mini"
+      circle
+      icon='el-icon-delete'
+      type="danger"
+      @click="ondeleteImg(img.id)"
+      :loading="img.loading"
+       ></el-button>
+         <!-- <i :class='{
+             // 收藏是实心的是 el-icon-star-on
              // false 是取消收藏  true是收藏
              "el-icon-star-off": !img.is_collected,
              "el-icon-star-on": img.is_collected,
              "star":true
          }' @click="oncllectImg(img)"></i>
-         <i class='el-icon-delete' @click="ondeleteImg(img.id)"></i>
+         <i class='el-icon-delete' @click="ondeleteImg(img.id)"></i> -->
      </div>
 </div>
   </el-col>
@@ -121,9 +138,17 @@ export default {
       }).then(res => { // 接口文档 参数 collect
         // // console.log(res)
         // this.images = res.data.data.results
-        const { results, total_count: totalCount } = res.data.data
+        // const { results, total_count: totalCount } = res.data.data
+        // this.images = results
+        // this.totalCount = totalCount
+        const results = res.data.data.results
+        results.forEach(img => {
+          // img 对象本来没有 loading 数据
+          // 我们这里收到的往里面添加该数据是用来控制每个收藏按钮的 loading 状态
+          img.loading = false
+        })
         this.images = results
-        this.totalCount = totalCount
+        this.totalCount = res.data.data.total_count
       })
     },
     onCollectChange (value) {
@@ -163,10 +188,12 @@ export default {
     },
 
     oncllectImg (img) {
-      console.log(img)
+      img.loading = true // 开启loading
+      // console.log(img)
       collectImage(img.id, !img.is_collected).then(() => {
         // console.log(res)
         img.is_collected = !img.is_collected
+        img.loading = false // 关闭loading
       })
     }
   }
@@ -185,13 +212,16 @@ position: relative;
 .little{
     position: absolute;
     top: 125px;
-    left: 70px;
+    // left: 70px;
     color: #dfdfad;
     font-size: 20px;
+    height: 25px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background-color: rgba(0, 0, 0, .5);
 }
-.star {
-    margin-right: 50px;
-}
+
 }
 .red {
     color: tomato;
