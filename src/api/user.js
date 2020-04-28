@@ -30,4 +30,12 @@ export const getUserProfile = () => {
     // }
   })
 }
+
 // 修改用户信息
+// export const updataUserProfile = data => {
+//   return request({
+//     method: 'PATCH',
+//     url: ' /mp/v1_0/user/profile',
+//     data
+//   })
+// }
