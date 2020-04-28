@@ -234,6 +234,8 @@ export default {
     // loadArticles 获取文章列表
     // 没传参数就等于1 传参了就是page
     loadArticles (page = 1) {
+      // 重置高亮页码，防止数据和页码不对应
+      this.page = page
       this.loading = true
       // getArticles 接收参数
       // 给getArticles 传参

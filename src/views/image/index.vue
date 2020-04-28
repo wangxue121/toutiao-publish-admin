@@ -47,6 +47,7 @@
   layout="prev, pager, next"
   :total="totalCount"
   :page-size="pageSize"
+  :current-page.sync="page"
   @current-change="onCurrentChange">
 </el-pagination>
 </el-card>
@@ -111,6 +112,8 @@ export default {
   methods: {
     // 获取素材
     loadImages (collect = false, page = 1) {
+      // 重置高亮页码，防止数据和页码不对应
+      this.page = page
       getImages({
         collect,
         page,
@@ -132,6 +135,7 @@ export default {
       // 更新素材列表 (加载全部)
       this.loadImages(false)
     },
+    // 分页
     onCurrentChange (page) {
       this.loadImages(false, page)
     },
@@ -160,9 +164,9 @@ export default {
 
     oncllectImg (img) {
       console.log(img)
-      collectImage(img.id, img.is_collected).then((res) => {
-        console.log(res)
-        img.is_collected = !res.data.data.collect
+      collectImage(img.id, !img.is_collected).then(() => {
+        // console.log(res)
+        img.is_collected = !img.is_collected
       })
     }
   }
