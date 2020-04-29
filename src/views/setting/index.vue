@@ -111,6 +111,7 @@ export default {
       // 预览图片
       const file = this.$refs.file
       const blobData = window.URL.createObjectURL(file.files[0])
+      // console.log(blobData)
       this.previewImage = blobData
       // console.log('haha')
 
