@@ -70,14 +70,17 @@
         :visible.sync="dialogVisible"
         @opened='onPropImage'
         @closed='onDialogClosed'>
+      <div class="preview-image-wrap">
         <img
+          class="preview-image"
           :src="previewImage"
-          alt=""
-          ref= 'preview-image'
+          ref="preview-image"
         >
+      </div>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button
+          :loading="updatePhotoLoading"
           type="primary"
           @click="onUpdataPhoto"
           >确 定</el-button>
@@ -95,6 +98,9 @@ import {
 } from '@/api/user'
 import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
+// 导入可以让任何组件相互通信的
+import globalBus from '@/utils/global-bus'
+
 export default {
   name: 'setting',
   components: {},
@@ -109,7 +115,9 @@ export default {
       dialogVisible: false, // 控制弹出层的显示与隐藏
       previewImage: '', // 预览图片
       cropper: null, // 裁切器实例
-      updateProfileLoading: false
+      updatePhotoLoading: false,
+      updateProfileLoading: false,
+      background: true
     }
   },
   computed: {},
@@ -168,8 +176,7 @@ export default {
         // aspectRatio: 2 / 4,
         viewMode: 1, // 1是限制裁切框不要超过画布大小, 0没限制, 2限制最小画布容器
         dragMode: 'none', // 定义裁纸器的拖动模式 none是什么都不做
-        cropBoxResizable: true,
-        background: true
+        cropBoxResizable: false
       })
     },
     // 方法1.销毁裁切器
@@ -179,6 +186,7 @@ export default {
       this.cropper.destroy()
     },
     onUpdataPhoto () {
+      this.updatePhotoLoading = true
       // 获取剪裁的图片
       this.cropper.getCroppedCanvas().toBlob(file => {
         // console.log(file)
@@ -191,10 +199,26 @@ export default {
           // 关闭对话框
           this.dialogVisible = false
           // 更新视图显示
-          this.loadUser()
+          // this.loadUser()
+
+          // 直接把裁切结果的文件对象转为 blob 数据本地预览
+          this.user.photo = window.URL.createObjectURL(file)
+
+          // 把服务端返回的图片进行展示有点慢
+          // this.user.photo = res.data.data.photo
+
+          // 关闭确定按钮的 loading
+          this.updatePhotoLoading = false
+
+          this.$message({
+            type: 'success',
+            message: '更新头像成功'
+          })
+
+          // 更新顶部登录用户的信息
+          globalBus.$emit('update-user', this.user)
         })
-      }
-      )
+      })
     },
     onSaveSetting (data) {
       this.updateProfileLoading = true
@@ -210,6 +234,10 @@ export default {
           message: '提交成功'
         })
         this.updateProfileLoading = false
+
+        // 更新头部当前登录用户的信息(用户名称)
+        // 发布通知，用户信息已修改
+        globalBus.$emit('update-user', this.user)
       })
     }
   }
@@ -217,12 +245,14 @@ export default {
 
 </script>
 <style scoped lang='less'>
+.preview-image-wrap{
+.preview-image{
   /* Ensure the size of the image fit the container perfectly */
-  img {
     display: block;
 
     /* This rule is very important, please don't ignore this */
     max-width: 100%;
     height: 200px;
-  }
+}
+}
 </style>
