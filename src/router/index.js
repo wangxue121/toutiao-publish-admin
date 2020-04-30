@@ -10,7 +10,8 @@ import Article from '@/views/article/'
 import Publish from '@/views/publish/'
 import Image from '@/views/image/'
 import Comment from '@/views/comment/'
-import Setting from '@/views/setting'
+import Setting from '@/views/setting/'
+import Fans from '@/views/fans/'
 
 Vue.use(VueRouter)
 // 路由配置表
@@ -55,6 +56,11 @@ const routes = [{
     path: '/setting',
     name: 'setting',
     component: Setting
+  },
+  {
+    path: '/fans',
+    name: 'fans',
+    component: Fans
   }]
 }]
 

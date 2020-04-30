@@ -25,7 +25,9 @@
             <el-input v-model="user.email"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">保存设置</el-button>
+            <el-button
+          :loading="updateProfileLoading"
+          type="primary" @click="onSaveSetting">保存设置</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -75,7 +77,10 @@
         >
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+          <el-button
+          type="primary"
+          @click="onUpdataPhoto"
+          >确 定</el-button>
       </span>
       </el-dialog>
     </el-card>
@@ -83,7 +88,11 @@
 </template>
 
 <script>
-import { getUserProfile } from '@/api/user'
+import {
+  getUserProfile,
+  updataUserPhoto,
+  updataUserProfile
+} from '@/api/user'
 import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
 export default {
@@ -99,7 +108,8 @@ export default {
       user: {},
       dialogVisible: false, // 控制弹出层的显示与隐藏
       previewImage: '', // 预览图片
-      cropper: null // 裁切器实例
+      cropper: null, // 裁切器实例
+      updateProfileLoading: false
     }
   },
   computed: {},
@@ -109,12 +119,9 @@ export default {
   },
   mounted () {},
   methods: {
-    onSubmit () {
-      console.log('submit!')
-    },
     loadUser () {
       getUserProfile().then(res => {
-        console.log(res)
+        // console.log(res)
         this.user = res.data.data
       })
     },
@@ -145,16 +152,24 @@ export default {
       }
       // 初始化裁切器
       this.cropper = new Cropper(image, {
-        aspectRatio: 16 / 9,
-        crop (event) {
-          console.log(event.detail.x)
-          console.log(event.detail.y)
-          console.log(event.detail.width)
-          console.log(event.detail.height)
-          console.log(event.detail.rotate)
-          console.log(event.detail.scaleX)
-          console.log(event.detail.scaleY)
-        }
+        // aspectRatio: 16 / 9,
+        // crop (event) {
+        //   console.log(event.detail.x)
+        //   console.log(event.detail.y)
+        //   console.log(event.detail.width)
+        //   console.log(event.detail.height)
+        //   console.log(event.detail.rotate)
+        //   console.log(event.detail.scaleX)
+        //   console.log(event.detail.scaleY)
+        // }
+
+        // 裁切器的配置
+        aspectRatio: 1, // 初始化比例
+        // aspectRatio: 2 / 4,
+        viewMode: 1, // 1是限制裁切框不要超过画布大小, 0没限制, 2限制最小画布容器
+        dragMode: 'none', // 定义裁纸器的拖动模式 none是什么都不做
+        cropBoxResizable: true,
+        background: true
       })
     },
     // 方法1.销毁裁切器
@@ -162,16 +177,52 @@ export default {
       // 对话框关闭销毁裁切器
       // 在data中设置copper：null 避免这里访问不到cropper
       this.cropper.destroy()
+    },
+    onUpdataPhoto () {
+      // 获取剪裁的图片
+      this.cropper.getCroppedCanvas().toBlob(file => {
+        // console.log(file)
+        const fd = new FormData()
+        // fd.append(字段名称,file)
+        fd.append('photo', file)
+        // 提交fd
+        updataUserPhoto(fd).then(res => {
+          // console.log(res)
+          // 关闭对话框
+          this.dialogVisible = false
+          // 更新视图显示
+          this.loadUser()
+        })
+      }
+      )
+    },
+    onSaveSetting (data) {
+      this.updateProfileLoading = true
+      // 先表单验证通过验证提交表单
+      const { name, intro, email } = this.user
+      updataUserProfile({
+        name,
+        intro,
+        email
+      }).then(res => {
+        this.$message({
+          type: 'success',
+          message: '提交成功'
+        })
+        this.updateProfileLoading = false
+      })
     }
   }
 }
 
 </script>
 <style scoped lang='less'>
+  /* Ensure the size of the image fit the container perfectly */
   img {
     display: block;
 
     /* This rule is very important, please don't ignore this */
     max-width: 100%;
+    height: 200px;
   }
 </style>
