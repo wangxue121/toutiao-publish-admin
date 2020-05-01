@@ -22,6 +22,7 @@
           />
         </div>
     </el-form-item>
+    <!-- 文章封面 -->
     <el-form-item label="封面:">
       <el-radio-group v-model="article.cover.type">
         <el-radio :label="1">单图</el-radio>
@@ -29,8 +30,20 @@
         <el-radio :label="0">无图</el-radio>
         <el-radio :label="-1">自动</el-radio>
       </el-radio-group>
+
+<!-- 我们需要把选择的封面图片放到article.cvoer.image数组中 -->
+
+      <!-- 做判断大于0 做遍历 -->
+      <template v-if="article.cover.type>0">
+        <upload-cover
+        v-for="(cover,index) in article.cover.type"
+        :key="cover"
+        @update-cover='onUpdateCover(index,$event)'
+        :cover-image="article.cover.images[index]"
+        />
+      </template>
     </el-form-item>
-    <el-form-item label="频道:" prop="channels">
+    <el-form-item label="频道:" prop="channel_id">
         <el-select v-model="article.channel_id" placeholder="请选择频道">
         <el-option
         v-for="(channel, index) in channels"
@@ -49,6 +62,7 @@
 </template>
 
 <script>
+import UploadCover from './components/upload-cover'
 // 获取频道列表
 import {
   getArticleChannels,
@@ -58,6 +72,7 @@ import {
 } from '@/api/article'
 
 import {
+  // 富文本编辑器配置
   ElementTiptap,
   // necessary extensions
   Doc,
@@ -81,7 +96,11 @@ import 'element-tiptap/lib/index.css'
 import { uploadImage } from '@/api/image'
 export default {
   name: 'PublishIndex',
-  components: { 'el-tiptap': ElementTiptap },
+  components: {
+    'el-tiptap': ElementTiptap,
+    UploadCover
+  },
+
   props: {},
   data () {
     return {
@@ -95,6 +114,7 @@ export default {
         },
         channel_id: null // 文章所属频道的id
       },
+      // 富文本编辑器配置
       extensions: [
         new Doc(),
         new Text(),
@@ -142,13 +162,14 @@ export default {
         },
         { required: true, message: '内容不能为空', trigger: 'blur' }
         ],
-        channels: [
+        channel_id: [
           { required: true, message: '请选择频道' }
         ]
       }
     }
   },
-  computed: {},
+  computed: {
+  },
   watch: {},
   created () { // 组件初始化完毕
     // 获取数据
@@ -236,6 +257,10 @@ export default {
         // console.log(res)
         this.article = res.data.data
       })
+    },
+    onUpdateCover (index, url) {
+      // console.log(url)
+      this.article.cover.images[index] = url
     }
   }
 }
