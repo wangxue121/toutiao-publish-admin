@@ -18,7 +18,15 @@
         <!-- tab栏切换 -->
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
             <el-tab-pane label="素材库" name="first">
-              素材库
+            <!-- ref的两个做用
+            1.作用到普通标签可以获取dom
+            2.作用到组件上可以获取组件 -->
+            <image-list
+            :is-show-add="false"
+            :is-show-action="false"
+            is-show-selected
+            ref="image-list"
+             />
             </el-tab-pane>
             <el-tab-pane label="上传图片" name="second">
               <input
@@ -49,9 +57,12 @@
 
 <script>
 import { uploadImage } from '@/api/image'
+import ImageList from '@/views/image/components/image-list'
 export default {
   name: 'UploadCover',
-  components: {},
+  components: {
+    ImageList
+  },
   props: ['cover-image'], // 父传子
   data () {
     return {
@@ -102,6 +113,20 @@ export default {
           // 将图片地址发送给父组件(子传父)
           this.$emit('update-cover', res.data.data.url)
         })
+      } else if (this.activeName === 'first') {
+      // 有一种组件通信方式，父组件可以直接访问子组件中的数据
+        const imageList = this.$refs['image-list']
+        // console.log(imageList.selected) // 选中素材的索引
+        const selected = imageList.selected
+        if (selected === null) {
+          this.$message('请选择封面图片')
+          return
+        }
+        // 关闭对话框
+        this.dialogVisible = false
+        // console.log(imageList.images[selected].url)
+        // 将图片地址发送给父组件(子传父)
+        this.$emit('update-cover', imageList.images[selected].url)
       }
     }
   }
