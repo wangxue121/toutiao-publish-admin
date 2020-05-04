@@ -101,14 +101,14 @@ export default {
   },
   methods: {
     handleClick (tab, event) {
-      console.log(tab, event)
+      // console.log(tab, event)
     },
     onloadfans (page = 1) {
       getFans({
         page,
         per_page: this.pageSize
       }).then(res => {
-        console.log(res)
+        // console.log(res)
         this.totalCount = res.data.data.total_count
         this.updatefans = res.data.data.results
       })

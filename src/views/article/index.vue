@@ -262,12 +262,12 @@ export default {
       })
     },
     onSubmit () {
-      console.log('submit!')
+      // console.log('submit!')
     },
 
     // page是点击的页码
     onCurrentChange (page) {
-      console.log(page) // 获取点击的页码
+      // console.log(page) // 获取点击的页码
       this.loadArticles(page)
     },
 
@@ -279,8 +279,8 @@ export default {
     },
 
     onDeleteArticle (articleId) {
-      console.log(articleId)
-      console.log(articleId.toString())
+      // console.log(articleId)
+      // console.log(articleId.toString())
       this.$confirm('你确定要删除吗', '删除提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

@@ -97,7 +97,7 @@ export default {
         per_page: this.pageSize, // 不写的话就是每页默认10条
         response_type: 'comment'
       }).then(res => {
-        console.log(res)
+        // console.log(res)
         this.comment = res.data.data.results
         this.totalCount = res.data.data.total_count
       })

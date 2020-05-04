@@ -138,7 +138,7 @@ export default {
             // 这个 return 返回的是Promise 对象
             // 因为 axios 本身就是返回的 Proimse 对象
             return uploadImage(fd).then(res => {
-              console.log(res)
+              // console.log(res)
               // 这个 return 是返回最后的结果
               return res.data.data.url
             })
